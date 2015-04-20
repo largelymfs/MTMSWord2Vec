@@ -17,12 +17,14 @@ public:
 	long long searchWordCnt(int index);				// search the count using word index
 	long long fileSize(int index);							// get the fileSize
 	int fileNumber();
-	long long totalWords();							// get the total words
-	~VocabGen();					
+	long long nowtotalWords(int index);							// get the total words
+	long long totalWords();
+	~VocabGen();
 	long long size();								// totally word number in the dataset
 private:
 	int fNumber;
 	std::vector<long long> fsize;
+	std::vector<long long> totalwords;
 	FileReader *f;
 	HashMap *h;
 	const int MAX_STRING;

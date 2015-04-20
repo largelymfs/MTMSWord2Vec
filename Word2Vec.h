@@ -11,9 +11,9 @@
 // Solution Class
 class Word2Vec{
 public:
-	Word2Vec(	const char* filename, 
-				int min_count, int window, 
-				int size, double alpha, 
+	Word2Vec(	const char* filename,
+				int min_count, int window,
+				int size, double alpha,
 				double min_alpha, int negative,
 				int thread_number, double subsampling,
 				double lambda, int iteration);
@@ -21,10 +21,10 @@ public:
 	void inittable();									// sample table
 	void saveClusterModel(const char* filename);				// output to the file
 	void saveEmbeddingModel(const char* filename);
-	void trainModel();									// train 
+	void trainModel();									// train
 
 	friend void* trainModelThread(void *id);			// thread to train the whole model
-	
+
 	~Word2Vec();
 private:
 	VocabGen* v;
@@ -32,7 +32,7 @@ private:
 	ExpTable* e;
 	int *table;
 	int layer1_size, window_size, min_count, negative, thread_number, iteration;
-	long long word_number, tablesize, filesize, total_words, word_counts_actual, total_train_words;
+	long long now_total_words, word_number, tablesize, filesize, total_words, word_counts_actual, total_train_words;
 	double alpha, min_alpha, subsampling, lambda;
 	char* filename, *indexname;
 	clock_t  start;

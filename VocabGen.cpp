@@ -1,6 +1,6 @@
 /*
 * @Author: largelyfs
-* @Date: Mon Mar 02 19:26:05 2015 +0800
+* @Date: Mon Apr 20 12:39:11 2015 +0800
 * @Last Modified by:   largelymfs
 * @Last Modified time: 2015-04-20 11:46:30
 */
@@ -28,8 +28,12 @@ void VocabGen::buildVocab(){
 	char buf[this->MAX_STRING];
 	char filenamebuf[this->MAX_STRING];
 	FileReader *tmpf;
+	long long last_total_words= 0;
+	long long now_total_words = 0;
+	this->totalwords.clear();
 	while (this->f->hasWord()){
 		this->f->getWord(filenamebuf);
+		std::cout << filenamebuf << std::endl;
 		if (strlen(filenamebuf) != 1){
 			tmpf = new FileReader(filenamebuf, this->MAX_STRING, 0);
 			while (tmpf->hasWord()){
@@ -37,6 +41,9 @@ void VocabGen::buildVocab(){
 				this->h->addWord(buf, 1);
 			}
 			this->fsize.push_back(tmpf->fileSize());
+			now_total_words = this->h->totalWords();
+			this->totalwords.push_back(now_total_words - last_total_words);
+			last_total_words = now_total_words;
 			delete tmpf;
 			this->fNumber++;
 		}
@@ -44,8 +51,8 @@ void VocabGen::buildVocab(){
 		this->f->getWord(buf);
 	}
 	for (int i = 0; i < this->fNumber; i++)
-		std::cout << this->fsize[i] << std::endl;
-}
+		std::cout << this->totalwords[i] << std::endl;
+ }
 
 void VocabGen::reduceVocab(int min_count){
 	this->h->reduce_vocab(min_count);
@@ -75,9 +82,12 @@ long long VocabGen::fileSize(int index){
 int VocabGen::fileNumber(){
 	return this->fNumber;
 }
-
 long long VocabGen::totalWords(){
 	return this->h->totalWords();
+}
+long long VocabGen::nowtotalWords(int index){
+	assert(index < this->fNumber);
+	return this->totalwords[index];
 }
 using namespace std;
 

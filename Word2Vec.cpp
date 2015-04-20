@@ -1,6 +1,6 @@
 /*
 * @Author: largelyfs
-* @Date: Thu Mar 26 12:22:44 2015 +0800
+* @Date: Mon Apr 20 12:37:54 2015 +0800
 * @Last Modified by:   largelymfs
 * @Last Modified time: 2015-04-20 11:55:15
 */
@@ -39,6 +39,7 @@ void* trainModelThread(void* id){
 	double alpha = w->alpha;
 	double min_alpha = w->min_alpha;
 	long long total_words = w->total_words;
+	long long now_total_words = w->now_total_words;
 	long long total_train_words = w->total_train_words;
 
 	clock_t now;
@@ -88,7 +89,7 @@ void* trainModelThread(void* id){
 			sentence_pos = 0;
 		}
 
-		if ((word_count >= total_words / w->thread_number) || (localf->hasWord()==false)){
+		if ((word_count >= now_total_words / w->thread_number) || (localf->hasWord()==false)){
 			w->word_counts_actual += (word_count - last_word_count);
 			local_iter--;
 			if (local_iter == 0) break;
@@ -230,7 +231,7 @@ Word2Vec::Word2Vec(	const char* filename, int min_count=4,
 					int window=5, int size=200, double alpha=0.025,
 					double min_alpha=0.001 * 0.025, int negative = 15,
 					int thread_number = 20, double subsampling = 1e-3,
-					double lambda = 0.1, int iteration = 5){
+					double lambda = 0.1, int iteration = 1){
 	this->filename = new char[MAX_STRING_LENGTH];
 	this->indexname = new char[MAX_STRING_LENGTH];
 	strcpy(this->indexname, filename);
@@ -252,7 +253,6 @@ Word2Vec::Word2Vec(	const char* filename, int min_count=4,
 	this->lambda = lambda;
 	this->word_counts_actual = 0;
 	this->iteration = iteration;
-
 
 	this->v->buildVocab();
 	this->v->reduceVocab(this->min_count);
@@ -381,6 +381,7 @@ void Word2Vec::saveClusterModel(const char* filename){
 }
 
 void Word2Vec::trainModel(){
+	std::cout << "Begin Training..." << std::endl;
 	pthread_t *pt = new pthread_t[this->thread_number];
 	Word2vecWithInt** data = new Word2vecWithInt*[this->thread_number];
 	for (int i = 0; i < this->thread_number; i++){
@@ -395,7 +396,8 @@ void Word2Vec::trainModel(){
 		if (strlen(filenamebuf)!=1){
 				std::cout << filenamebuf << std::endl;
 				this->filesize = this->v->fileSize(id);
-				strcpy(this->filename, filenamebuf);		
+				strcpy(this->filename, filenamebuf);
+				this->now_total_words = this->v->nowtotalWords(id);
 				for (int i = 0; i < this->thread_number; i++) pthread_create(&pt[i], NULL, trainModelThread, (void*)(data[i]));
 				for (int i = 0; i < this->thread_number; i++) pthread_join(pt[i], NULL);
 				strcpy(outputbuf,this->filename);
